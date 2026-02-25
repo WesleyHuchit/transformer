@@ -127,10 +127,10 @@ func onReady() {
 				// fmt.Println("Convertido:", heicPath, "->", jpgPath)
 			}
 
-			for _, heicPath := range entries {
-				fileName := filepath.Base(filepath.Join(path, heicPath.Name()))
+			for _, heicPath := range heicFiles {
+				fileName := filepath.Base(filepath.Join(path, heicPath))
 				destPath := filepath.Join(heicFolderPath, fileName)
-				if err := os.Rename(filepath.Join(path, heicPath.Name()), destPath); err != nil {
+				if err := os.Rename(filepath.Join(path, heicPath), destPath); err != nil {
 					fmt.Println("Erro ao mover", fileName, err)
 					stop()
 					continue
