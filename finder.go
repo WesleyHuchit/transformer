@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -23,5 +24,9 @@ func getFrontmostFinderPath() (string, error) {
 	if path == "" {
 		return "", fmt.Errorf("nenhuma janela do Finder aberta")
 	}
-	return path, nil
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return "", err
+	}
+	return absPath, nil
 }

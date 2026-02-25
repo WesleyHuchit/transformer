@@ -1,18 +1,18 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
-
-	"strings"
-
-	_ "embed"
-	"time"
-
 	"bytes"
+	"fmt"
 	"image"
 	"image/png"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"sync"
+	"time"
+
+	_ "embed"
 
 	"github.com/disintegration/imaging"
 	"github.com/getlantern/systray"
@@ -24,6 +24,7 @@ func main() {
 
 func rotateIcon(icon []byte) (stop func()) {
 	stopCh := make(chan struct{})
+	var once sync.Once
 	img, _, _ := image.Decode(bytes.NewReader(icon))
 
 	go func() {
@@ -54,7 +55,8 @@ func rotateIcon(icon []byte) (stop func()) {
 
 	}()
 	systray.SetIcon(icon)
-	return func() { close(stopCh) }
+	notify("Sucesso", "Arquivos convertidos com sucesso")
+	return func() { once.Do(func() { close(stopCh) }) }
 }
 
 func onReady() {
@@ -74,6 +76,7 @@ func onReady() {
 
 	go func() {
 		for range mPath.ClickedCh {
+			systray.SetTooltip("Conversão concluída!")
 			stop := rotateIcon(iconData)
 
 			path, err := getFrontmostFinderPath()
@@ -128,9 +131,9 @@ func onReady() {
 			}
 
 			for _, heicPath := range heicFiles {
-				fileName := filepath.Base(filepath.Join(path, heicPath))
+				fileName := filepath.Base(heicPath)
 				destPath := filepath.Join(heicFolderPath, fileName)
-				if err := os.Rename(filepath.Join(path, heicPath), destPath); err != nil {
+				if err := os.Rename(heicPath, destPath); err != nil {
 					fmt.Println("Erro ao mover", fileName, err)
 					stop()
 					continue
@@ -150,4 +153,11 @@ func onReady() {
 
 func onExit() {
 	fmt.Println("Exit")
+}
+
+func notify(title, message string) {
+	cmd := exec.Command("osascript", "-e",
+		fmt.Sprintf(`display notification "%s" with title "%s"`,
+			message, title))
+	cmd.Run()
 }
