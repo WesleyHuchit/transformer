@@ -7,11 +7,42 @@ import (
 
 	"strings"
 
+	_ "embed"
+	"time"
+
+	"bytes"
+	"image"
+	"image/png"
+
+	"github.com/disintegration/imaging"
 	"github.com/getlantern/systray"
 )
 
 func main() {
 	systray.Run(onReady, onExit)
+}
+
+func rotateIcon(icon []byte) {
+	img, _, _ := image.Decode(bytes.NewReader(icon))
+
+	go func() {
+		angle := 0.0
+		ticker := time.NewTicker(120 * time.Millisecond)
+
+		for range ticker.C {
+			rotated := imaging.Rotate(img, angle, image.Transparent)
+
+			var buf bytes.Buffer
+			png.Encode(&buf, rotated)
+
+			systray.SetIcon(buf.Bytes())
+
+			angle += 30
+			if angle >= 360 {
+				angle = 0
+			}
+		}
+	}()
 }
 
 func onReady() {
@@ -31,6 +62,7 @@ func onReady() {
 
 	go func() {
 		for range mPath.ClickedCh {
+			rotateIcon(iconData)
 
 			path, err := getFrontmostFinderPath()
 
