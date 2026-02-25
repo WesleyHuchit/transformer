@@ -12,13 +12,10 @@ import (
 )
 
 func main() {
-	fmt.Println("Hello, World!")
-
 	systray.Run(onReady, onExit)
 }
 
 func onReady() {
-	fmt.Println("Open")
 	iconData, err := os.ReadFile("icon.png")
 
 	if err != nil {
@@ -32,11 +29,6 @@ func onReady() {
 
 	mPath := systray.AddMenuItem("Copy", "Copy path")
 	mQuit := systray.AddMenuItem("Sair", "Encerrar o app")
-
-	// go func() {
-	// 	<-mPath.ClickedCh
-	// 	fmt.Println("Path")
-	// }()
 
 	go func() {
 		for range mPath.ClickedCh {
@@ -69,13 +61,8 @@ func onReady() {
 
 			}
 
-			// fmt.Println("Arquivos HEIC encontrados:", len(entries))
 			fmt.Println("Arquivos HEIC encontrados:", len(heicFiles))
-			// for _, f := range heicFiles {
-			// 	fmt.Println(f)
-			// }
 
-			// fmt.Println("Pasta atual no Finder:", path)
 			heicFolderName := "heic"
 			heicFolderPath := filepath.Join(path, heicFolderName)
 
