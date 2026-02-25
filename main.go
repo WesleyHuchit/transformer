@@ -22,27 +22,39 @@ func main() {
 	systray.Run(onReady, onExit)
 }
 
-func rotateIcon(icon []byte) {
+func rotateIcon(icon []byte) (stop func()) {
+	stopCh := make(chan struct{})
 	img, _, _ := image.Decode(bytes.NewReader(icon))
 
 	go func() {
-		angle := 0.0
 		ticker := time.NewTicker(120 * time.Millisecond)
+		defer ticker.Stop()
+		angle := 0.0
 
-		for range ticker.C {
-			rotated := imaging.Rotate(img, angle, image.Transparent)
+		for {
+			select {
+			case <-ticker.C:
+				rotated := imaging.Rotate(img, angle, image.Transparent)
 
-			var buf bytes.Buffer
-			png.Encode(&buf, rotated)
+				var buf bytes.Buffer
+				png.Encode(&buf, rotated)
 
-			systray.SetIcon(buf.Bytes())
+				systray.SetIcon(buf.Bytes())
 
-			angle += 30
-			if angle >= 360 {
-				angle = 0
+				angle += 30
+				if angle >= 360 {
+					angle = 0
+				}
+
+			case <-stopCh:
+				systray.SetIcon(icon) // volta para o original
+				return
 			}
 		}
+
 	}()
+	systray.SetIcon(icon)
+	return func() { close(stopCh) }
 }
 
 func onReady() {
@@ -62,12 +74,13 @@ func onReady() {
 
 	go func() {
 		for range mPath.ClickedCh {
-			rotateIcon(iconData)
+			stop := rotateIcon(iconData)
 
 			path, err := getFrontmostFinderPath()
 
 			if err != nil {
 				fmt.Println("Erro:", err) // ou mostrar no menu/notificação
+				stop()
 				continue
 			}
 
@@ -75,6 +88,7 @@ func onReady() {
 
 			if err != nil {
 				fmt.Println("Erro ao listar pasta:", err)
+				stop()
 				continue
 			}
 
@@ -99,6 +113,7 @@ func onReady() {
 
 			if err := os.MkdirAll(heicFolderPath, 0755); err != nil {
 				fmt.Println("Erro ao criar pasta:", err)
+				stop()
 				continue
 			}
 
@@ -106,6 +121,7 @@ func onReady() {
 				_, err := heicToJPG(heicPath)
 				if err != nil {
 					fmt.Println("Erro ao converter", heicPath, err)
+					stop()
 					continue
 				}
 				// fmt.Println("Convertido:", heicPath, "->", jpgPath)
@@ -116,11 +132,12 @@ func onReady() {
 				destPath := filepath.Join(heicFolderPath, fileName)
 				if err := os.Rename(filepath.Join(path, heicPath.Name()), destPath); err != nil {
 					fmt.Println("Erro ao mover", fileName, err)
+					stop()
 					continue
 				}
 				// fmt.Println("Movido:", fileName, "->", heicFolderPath)
 			}
-
+			stop()
 		}
 	}()
 
