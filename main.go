@@ -76,7 +76,6 @@ func onReady() {
 
 	go func() {
 		for range mPath.ClickedCh {
-			systray.SetTooltip("Conversão concluída!")
 			stop := rotateIcon(iconData)
 
 			path, err := getFrontmostFinderPath()
@@ -140,6 +139,7 @@ func onReady() {
 				}
 				// fmt.Println("Movido:", fileName, "->", heicFolderPath)
 			}
+			systray.SetTooltip("Conversão concluída!")
 			stop()
 		}
 	}()
