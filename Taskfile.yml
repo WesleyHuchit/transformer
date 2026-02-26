@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: '3'
+
+vars:
+  GREETING: Hello, world!
+
+tasks:
+  default:
+    desc: Lista todas as tarefas
+    cmds:
+      - task --list
+
+  verify:
+    desc: Verifica se o DMG é válido
+    cmds:
+      - spctl -a -t exec -vv "Transformer 1.0.0.dmg"
+
+  run:
+    desc: Executa a aplicação
+    cmds:
+      - go run .
+
+  create-dmg:
+    desc: Cria o DMG
+    cmds:
+      - go build -o transformer .
+      - cp transformer Transformer.app/Contents/MacOS/transformer
+      - create-dmg Transformer.app
