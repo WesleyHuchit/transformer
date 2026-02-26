@@ -35,7 +35,9 @@ func rotateIcon(icon []byte) (stop func()) {
 		for {
 			select {
 			case <-ticker.C:
+				const iconSize = 20
 				rotated := imaging.Rotate(img, angle, image.Transparent)
+				rotated = imaging.Resize(rotated, iconSize, iconSize, imaging.Lanczos)
 
 				var buf bytes.Buffer
 				png.Encode(&buf, rotated)
@@ -68,15 +70,21 @@ func onReady() {
 	}
 
 	systray.SetIcon(iconData)
-	// systray.SetTitle("Transformer")
 	systray.SetTooltip("Converta HEIC para JPG")
 
 	mPath := systray.AddMenuItem("Copy", "Copy path")
 	mQuit := systray.AddMenuItem("Sair", "Encerrar o app")
 
+	loadingIcon, err := os.ReadFile("loading.png")
+	if err != nil {
+		fmt.Println("Error reading icon.svg:", err)
+		return
+	}
+
 	go func() {
 		for range mPath.ClickedCh {
-			stop := rotateIcon(iconData)
+
+			stop := rotateIcon(loadingIcon)
 
 			path, err := getFrontmostFinderPath()
 
@@ -141,6 +149,7 @@ func onReady() {
 			}
 			systray.SetTooltip("Conversão concluída!")
 			stop()
+			systray.SetIcon(iconData)
 		}
 	}()
 
