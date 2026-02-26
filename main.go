@@ -109,6 +109,8 @@ func onReady() {
 				continue
 			}
 
+			_ = setFinderSortByName()
+
 			entries, err := os.ReadDir(path)
 
 			if err != nil {

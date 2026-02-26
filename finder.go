@@ -30,3 +30,13 @@ func getFrontmostFinderPath() (string, error) {
 	}
 	return absPath, nil
 }
+
+func setFinderSortByName() error {
+	script := `tell application "Finder"
+        if (count of windows) > 0 then
+            set current view of front window to list view
+            set sort column of list view options of front window to name column
+        end if
+    end tell`
+	return exec.Command("osascript", "-e", script).Run()
+}
