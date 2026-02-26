@@ -6,7 +6,7 @@
     <key>CFBundleName</key>
     <string>Transformer</string>
     <key>CFBundleExecutable</key>
-    <string>Transformer</string>
+    <string>transformer</string>
     <key>CFBundleIdentifier</key>
     <string>com.huchit.transformer</string>
     <key>CFBundleVersion</key>
