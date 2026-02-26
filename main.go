@@ -61,11 +61,28 @@ func rotateIcon(icon []byte) (stop func()) {
 	return func() { once.Do(func() { close(stopCh) }) }
 }
 
+// resourcePath retorna o caminho para um arquivo de recurso.
+// Quando o app roda dentro de um .app bundle (ex: em Aplicativos), usa Contents/Resources.
+// Em desenvolvimento, usa a pasta images/ na raiz do projeto.
+func resourcePath(filename string) string {
+	exe, err := os.Executable()
+	if err != nil {
+		return filepath.Join("images", filename)
+	}
+	exe, _ = filepath.EvalSymlinks(exe)
+	dir := filepath.Dir(exe)
+	if strings.Contains(dir, ".app/Contents/MacOS") {
+		return filepath.Join(dir, "..", "Resources", filename)
+	}
+	return filepath.Join("images", filename)
+}
+
 func onReady() {
-	iconData, err := os.ReadFile("icon.png")
+	iconPath := resourcePath("icon.png")
+	iconData, err := os.ReadFile(iconPath)
 
 	if err != nil {
-		fmt.Println("Error")
+		fmt.Println("Error loading icon:", iconPath, err)
 		return
 	}
 
@@ -75,9 +92,10 @@ func onReady() {
 	mPath := systray.AddMenuItem("Copy", "Copy path")
 	mQuit := systray.AddMenuItem("Sair", "Encerrar o app")
 
-	loadingIcon, err := os.ReadFile("loading.png")
+	loadingPath := resourcePath("loading.png")
+	loadingIcon, err := os.ReadFile(loadingPath)
 	if err != nil {
-		fmt.Println("Error reading icon.svg:", err)
+		fmt.Println("Error reading loading icon:", loadingPath, err)
 		return
 	}
 

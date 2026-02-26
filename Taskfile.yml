@@ -26,6 +26,8 @@ tasks:
     cmds:
       - go build -o binary/transformer .
       - cp binary/transformer Transformer.app/Contents/MacOS/transformer
+      - mkdir -p Transformer.app/Contents/Resources
+      - cp images/icon.png images/loading.png Transformer.app/Contents/Resources/
       - mkdir -p dmg
       - create-dmg Transformer.app
       - mv Transformer*.dmg dmg/
