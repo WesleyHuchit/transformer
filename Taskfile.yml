@@ -24,6 +24,8 @@ tasks:
   create-dmg:
     desc: Cria o DMG
     cmds:
-      - go build -o transformer .
-      - cp transformer Transformer.app/Contents/MacOS/transformer
+      - go build -o binary/transformer .
+      - cp binary/transformer Transformer.app/Contents/MacOS/transformer
+      - mkdir -p dmg
       - create-dmg Transformer.app
+      - mv Transformer*.dmg dmg/
