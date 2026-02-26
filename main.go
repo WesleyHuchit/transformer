@@ -61,9 +61,6 @@ func rotateIcon(icon []byte) (stop func()) {
 	return func() { once.Do(func() { close(stopCh) }) }
 }
 
-// resourcePath retorna o caminho para um arquivo de recurso.
-// Quando o app roda dentro de um .app bundle (ex: em Aplicativos), usa Contents/Resources.
-// Em desenvolvimento, usa a pasta images/ na raiz do projeto.
 func resourcePath(filename string) string {
 	exe, err := os.Executable()
 	if err != nil {
