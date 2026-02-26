@@ -57,7 +57,7 @@ func rotateIcon(icon []byte) (stop func()) {
 
 	}()
 	systray.SetIcon(icon)
-	notify("Sucesso", "Arquivos convertidos com sucesso")
+	// notify("Sucesso", "Arquivos convertidos com sucesso")
 	return func() { once.Do(func() { close(stopCh) }) }
 }
 
@@ -128,10 +128,16 @@ func onReady() {
 					fullPath := filepath.Join(path, e.Name())
 					heicFiles = append(heicFiles, fullPath)
 				}
-
 			}
 
-			fmt.Println("Arquivos HEIC encontrados:", len(heicFiles))
+			if len(heicFiles) == 0 {
+				notify("Erro", "Nenhum arquivo HEIC encontrado")
+				stop()
+				systray.SetIcon(iconData)
+				return
+			}
+
+			// fmt.Println("Arquivos HEIC encontrados:", len(heicFiles))
 
 			heicFolderName := "heic"
 			heicFolderPath := filepath.Join(path, heicFolderName)
@@ -162,7 +168,8 @@ func onReady() {
 				}
 				// fmt.Println("Movido:", fileName, "->", heicFolderPath)
 			}
-			systray.SetTooltip("Conversão concluída!")
+
+			// systray.SetTooltip("Conversão concluída!")
 			stop()
 			systray.SetIcon(iconData)
 		}
