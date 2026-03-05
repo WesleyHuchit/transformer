@@ -86,6 +86,8 @@ func onReady() {
 	systray.SetIcon(iconData)
 	systray.SetTooltip("Converta HEIC para JPG")
 
+	go sniff()
+
 	mPath := systray.AddMenuItem("Copy", "Copy path")
 	mQuit := systray.AddMenuItem("Sair", "Encerrar o app")
 
