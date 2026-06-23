@@ -14,7 +14,7 @@ tasks:
   verify:
     desc: Verifica se o DMG é válido
     cmds:
-      - spctl -a -t exec -vv "Transformer 1.0.0.dmg"
+      - spctl -a -t exec -vv "dmg/converter 1.0.0.dmg"
 
   run:
     desc: Executa a aplicação
@@ -24,10 +24,10 @@ tasks:
   create-dmg:
     desc: Cria o DMG
     cmds:
-      - go build -o binary/transformer .
-      - cp binary/transformer Transformer.app/Contents/MacOS/transformer
-      - mkdir -p Transformer.app/Contents/Resources
-      - cp images/icon.png images/loading.png Transformer.app/Contents/Resources/
+      - go build -o binary/converter .
+      - cp binary/converter Converter.app/Contents/MacOS/converter
+      - mkdir -p Converter.app/Contents/Resources
+      - cp images/icon.png images/loading.png Converter.app/Contents/Resources/
       - mkdir -p dmg
-      - create-dmg Transformer.app
-      - mv Transformer*.dmg dmg/
+      - create-dmg Converter.app
+      - mv converter*.dmg dmg/

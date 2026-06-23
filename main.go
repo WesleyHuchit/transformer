@@ -1,64 +1,19 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"image"
-	"image/png"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"sync"
-	"time"
 
 	_ "embed"
 
-	"github.com/disintegration/imaging"
 	"github.com/getlantern/systray"
 )
 
 func main() {
 	systray.Run(onReady, onExit)
-}
-
-func rotateIcon(icon []byte) (stop func()) {
-	stopCh := make(chan struct{})
-	var once sync.Once
-	img, _, _ := image.Decode(bytes.NewReader(icon))
-
-	go func() {
-		ticker := time.NewTicker(120 * time.Millisecond)
-		defer ticker.Stop()
-		angle := 0.0
-
-		for {
-			select {
-			case <-ticker.C:
-				const iconSize = 20
-				rotated := imaging.Rotate(img, angle, image.Transparent)
-				rotated = imaging.Resize(rotated, iconSize, iconSize, imaging.Lanczos)
-
-				var buf bytes.Buffer
-				png.Encode(&buf, rotated)
-
-				systray.SetIcon(buf.Bytes())
-
-				angle += 30
-				if angle >= 360 {
-					angle = 0
-				}
-
-			case <-stopCh:
-				systray.SetIcon(icon) // volta para o original
-				return
-			}
-		}
-
-	}()
-	systray.SetIcon(icon)
-	// notify("Sucesso", "Arquivos convertidos com sucesso")
-	return func() { once.Do(func() { close(stopCh) }) }
 }
 
 func resourcePath(filename string) string {
@@ -88,11 +43,12 @@ func onReady() {
 
 	go sniff()
 
-	mPath := systray.AddMenuItem("Copy", "Copy path")
+	mPath := systray.AddMenuItem("Converter", "Copy path")
 	mQuit := systray.AddMenuItem("Sair", "Encerrar o app")
 
 	loadingPath := resourcePath("loading.png")
 	loadingIcon, err := os.ReadFile(loadingPath)
+
 	if err != nil {
 		fmt.Println("Error reading loading icon:", loadingPath, err)
 		return
@@ -106,10 +62,12 @@ func onReady() {
 			path, err := getFrontmostFinderPath()
 
 			if err != nil {
-				fmt.Println("Erro:", err) // ou mostrar no menu/notificação
+				fmt.Println("Erro:", err)
 				stop()
 				continue
 			}
+
+			// systray.SetTitle(path)
 
 			_ = setFinderSortByName()
 
@@ -140,8 +98,6 @@ func onReady() {
 				systray.SetIcon(iconData)
 				return
 			}
-
-			// fmt.Println("Arquivos HEIC encontrados:", len(heicFiles))
 
 			heicFolderName := "heic"
 			heicFolderPath := filepath.Join(path, heicFolderName)

@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/fsnotify/fsnotify"
 )
@@ -14,7 +16,13 @@ func sniff() {
 	}
 	defer watcher.Close()
 
-	err = watcher.Add("/Users/wesleyhuchit/Downloads")
+	home, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatal(err)
+	}
+	downloads := filepath.Join(home, "Downloads")
+	err = watcher.Add(downloads)
+
 	if err != nil {
 		log.Fatal(err)
 	}
